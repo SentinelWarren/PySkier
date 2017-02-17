@@ -1,2 +1,2 @@
-# Skate-Game
+# Skier-Game
 Python Skier Game
