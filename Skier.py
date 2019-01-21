@@ -5,16 +5,56 @@
 
 # Skier program
 
-import pygame, sys, random
+import pygame, sys, os, random, cv2
+from collections import OrderedDict
+import time
+
 # different images for the skier depending on his direction
-skier_images = ["skier_down.png", "skier_right1.png", "skier_right2.png",
-                 "skier_left2.png", "skier_left1.png"]
+
+
+class GetImages(object):
+
+    def __init__(self):
+        self.folder = 'images/'
+        self.image_order = ["skier_down.png", "skier_right1.png", "skier_right2.png","skier_left2.png", "skier_left1.png"]
+
+    
+    def load_images(self):
+        self.image_names = []
+        for filename in os.listdir(self.folder):
+            if any([filename.endswith(x) for x in ['.png']]):
+                self.img_name = os.path.join(filename)
+                if not filename.startswith(('skier_crash.png', 'skier_flag.png', 'skier_tree.png')):
+                    self.image_names.append(self.img_name)
+
+
+    def sort_images(self):
+        self.unsorted_images = self.image_names
+        self.order_map = {}
+        for pos, item in enumerate(self.image_order):
+            self.order_map[item] = pos
+
+        self.sorted_images = sorted(self.unsorted_images, key=self.order_map.get)
+        
+        return self.sort_images
+
+#skier_images.sort(key=order_map.get)
+
+images = GetImages()
+skier_images = images.sort_images()
+print(skier_images)
+
+
+
+
+
 
 # class for the Skier sprite
 class SkierClass(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load("skier_down.png")
+        print(self.image)
         self.rect = self.image.get_rect()
         self.rect.center = [320, 100]
         self.angle = 0
@@ -22,12 +62,17 @@ class SkierClass(pygame.sprite.Sprite):
     def turn(self, direction): 
         # load new image and change speed when the skier turns
         self.angle = self.angle + direction
+        print(self.angle)
         if self.angle < -2:  self.angle = -2
         if self.angle >  2:  self.angle =  2 
         center = self.rect.center
+        print(center)
         self.image = pygame.image.load(skier_images[self.angle])
+        print(self.image)
         self.rect = self.image.get_rect()
+        print(self.rect)
         self.rect.center = center
+        print(self.rect.center)
         speed = [self.angle, 6 - abs(self.angle) * 2]
         return speed
     
@@ -41,7 +86,8 @@ class SkierClass(pygame.sprite.Sprite):
 class ObstacleClass(pygame.sprite.Sprite):
     def __init__(self, image_file, location, type):
         pygame.sprite.Sprite.__init__(self) 
-        self.image_file = image_file        
+        self.image_file = image_file
+        print(self.image_file)        
         self.image = pygame.image.load(image_file)
         self.rect = self.image.get_rect()
         self.rect.center = location
