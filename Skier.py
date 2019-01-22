@@ -6,47 +6,89 @@
 # Skier program
 
 import pygame, sys, os, random, cv2
-from collections import OrderedDict
+
 import time
 
 # different images for the skier depending on his direction
+"""
+start = time. time()
+"the code you want to test stays here"
+end = time. time()
+print(end - start)
+"""
 
 
+def load_images():
+    folder = 'images/'
+    image_names = []
+
+    for filename in os.listdir(folder):
+        if any([filename.endswith(x) for x in ['.png']]):
+            img_name = os.path.join(filename)
+            if not filename.startswith(('skier_crash.png', 'skier_flag.png', 'skier_tree.png')):
+                image_names.append(img_name)
+
+    return image_names
+
+
+def sort_images():
+    image_order = ["skier_down.png", "skier_right1.png", "skier_right2.png", "skier_left2.png", "skier_left1.png"]
+    unsorted_images = load_images()
+    order_map = {}
+    for pos, item in enumerate(image_order):
+        order_map[item] = pos
+
+    sorted_images = sorted(unsorted_images, key=order_map.get)
+
+    return sorted_images
+
+
+skier_images = sort_images()
+
+"""
 class GetImages(object):
 
     def __init__(self):
         self.folder = 'images/'
         self.image_order = ["skier_down.png", "skier_right1.png", "skier_right2.png","skier_left2.png", "skier_left1.png"]
+        self.order_map = {}
+        
+        
 
-    
     def load_images(self):
         self.image_names = []
         for filename in os.listdir(self.folder):
             if any([filename.endswith(x) for x in ['.png']]):
-                self.img_name = os.path.join(filename)
+                img_name = os.path.join(filename)
                 if not filename.startswith(('skier_crash.png', 'skier_flag.png', 'skier_tree.png')):
-                    self.image_names.append(self.img_name)
+                    self.image_names.append(img_name)
 
+        return self.image_names
 
     def sort_images(self):
-        self.unsorted_images = self.image_names
-        self.order_map = {}
+        #self.sorted_images = self.load_images()
+        
         for pos, item in enumerate(self.image_order):
             self.order_map[item] = pos
 
-        self.sorted_images = sorted(self.unsorted_images, key=self.order_map.get)
+        #self.sorted_images = self.load_images(), self.sorted_images.sort(key=self.order_map.get)
+        self.loaded_images = self.load_images()
+        self.sorted_images = sorted(self.loaded_images, key=self.order_map.get)
         
-        return self.sort_images
-
-#skier_images.sort(key=order_map.get)
-
-images = GetImages()
-skier_images = images.sort_images()
-print(skier_images)
+        return self.sorted_images
 
 
+#Sorted skier_images
+#Simages = GetImages()
 
+print(GetImages().load_images())
+print(GetImages().sort_images())
+skier_images1 = GetImages().sort_images()
+print(skier_images1)
+end = time. time()
+print(end - start)
 
+"""
 
 
 # class for the Skier sprite
@@ -54,68 +96,67 @@ class SkierClass(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load("skier_down.png")
-        print(self.image)
         self.rect = self.image.get_rect()
         self.rect.center = [320, 100]
         self.angle = 0
-        
-    def turn(self, direction): 
+
+    def turn(self, direction):
         # load new image and change speed when the skier turns
         self.angle = self.angle + direction
-        print(self.angle)
         if self.angle < -2:  self.angle = -2
-        if self.angle >  2:  self.angle =  2 
+        if self.angle > 2:  self.angle = 2
         center = self.rect.center
-        print(center)
         self.image = pygame.image.load(skier_images[self.angle])
-        print(self.image)
         self.rect = self.image.get_rect()
-        print(self.rect)
         self.rect.center = center
-        print(self.rect.center)
         speed = [self.angle, 6 - abs(self.angle) * 2]
         return speed
-    
+
     def move(self, speed):
         # move the skier right and left
         self.rect.centerx = self.rect.centerx + speed[0]
         if self.rect.centerx < 20:  self.rect.centerx = 20
-        if self.rect.centerx > 620: self.rect.centerx = 620 
-        
-# class for obstacle sprites (trees and flags)
+        if self.rect.centerx > 620: self.rect.centerx = 620
+
+    # class for obstacle sprites (trees and flags)
+
+
 class ObstacleClass(pygame.sprite.Sprite):
     def __init__(self, image_file, location, type):
-        pygame.sprite.Sprite.__init__(self) 
+        pygame.sprite.Sprite.__init__(self)
         self.image_file = image_file
-        print(self.image_file)        
         self.image = pygame.image.load(image_file)
         self.rect = self.image.get_rect()
         self.rect.center = location
         self.type = type
         self.passed = False
-                   
+
     def update(self):
         global speed
         self.rect.centery -= speed[1]
         if self.rect.centery < -32:
             self.kill()
 
+
 # create one "screen" of obstacles: 640 x 640
 # use "blocks" of 64 x 64 pixels, so objects aren't too close together
 def create_map():
     global obstacles
     locations = []
-    for i in range(10):                 # 10 obstacles per screen 
+    for _i in range(10):  # 10 obstacles per screen
         row = random.randint(0, 9)
         col = random.randint(0, 9)
-        location  = [col * 64 + 32, row * 64 + 32 + 640] #center x, y for obstacle
-        if not (location in locations):        # prevent 2 obstacles in the same place
-            locations.append(location)          
+        location = [col * 64 + 32, row * 64 + 32 + 640]  # center x, y for obstacle
+        if not (location in locations):  # prevent 2 obstacles in the same place
+            locations.append(location)
             type = random.choice(["tree", "flag"])
-            if type == "tree": img = "skier_tree.png"
-            elif type == "flag":  img = "skier_flag.png"
+            if type == "tree":
+                img = "skier_tree.png"
+            elif type == "flag":
+                img = "skier_flag.png"
             obstacle = ObstacleClass(img, location, type)
             obstacles.add(obstacle)
+
 
 # redraw the screen, including all sprites
 def animate():
@@ -123,18 +164,19 @@ def animate():
     obstacles.draw(screen)
     screen.blit(skier.image, skier.rect)
     screen.blit(score_text, [10, 10])
-    pygame.display.flip()    
+    pygame.display.flip()
+
 
 # initialize everything
 pygame.init()
-screen = pygame.display.set_mode([640,640])
+screen = pygame.display.set_mode([640, 640])
 clock = pygame.time.Clock()
 speed = [0, 6]
-obstacles = pygame.sprite.Group()   # group of obstacle objects
+obstacles = pygame.sprite.Group()  # group of obstacle objects
 skier = SkierClass()
 map_position = 0
 points = 0
-create_map()      # create one screen full of obstacles
+create_map()  # create one screen full of obstacles
 font = pygame.font.Font(None, 50)
 
 # main Pygame event loop
@@ -143,39 +185,38 @@ while running:
     clock.tick(30)
     for event in pygame.event.get():
         if event.type == pygame.QUIT: running = False
-        
-        if event.type == pygame.KEYDOWN:          # check for key presses
-            if event.key == pygame.K_LEFT:        # left arrow turns left
+
+        if event.type == pygame.KEYDOWN:  # check for key presses
+            if event.key == pygame.K_LEFT:  # left arrow turns left
                 speed = skier.turn(-1)
-            elif event.key == pygame.K_RIGHT:     #right arrow turns right
+            elif event.key == pygame.K_RIGHT:  # right arrow turns right
                 speed = skier.turn(1)
-    skier.move(speed)                         # move the skier (left or right)
-    map_position += speed[1]                      # scroll the obstacles
-    
+    skier.move(speed)  # move the skier (left or right)
+    map_position += speed[1]  # scroll the obstacles
+
     # create a new block of obstacles at the bottom
     if map_position >= 640:
         create_map()
         map_position = 0
-    
+
     # check for hitting trees or getting flags
-    hit =  pygame.sprite.spritecollide(skier, obstacles, False)
+    hit = pygame.sprite.spritecollide(skier, obstacles, False)
     if hit:
-        if hit[0].type == "tree" and not hit[0].passed:  #crashed into tree  
+        if hit[0].type == "tree" and not hit[0].passed:  # crashed into tree
             points = points - 100
             skier.image = pygame.image.load("skier_crash.png")  # crash image
-            animate()  
+            animate()
             pygame.time.delay(1000)
             skier.image = pygame.image.load("skier_down.png")  # resume skiing
             skier.angle = 0
             speed = [0, 6]
             hit[0].passed = True
-        elif hit[0].type == "flag" and not hit[0].passed:   # got a flag
+        elif hit[0].type == "flag" and not hit[0].passed:  # got a flag
             points += 10
-            hit[0].kill()                                 # remove the flag 
-    
+            hit[0].kill()  # remove the flag
+
     obstacles.update()
-    score_text = font.render("Score: " +str(points), 1, (0, 0, 0))
+    score_text = font.render("Score: " + str(points), 1, (0, 0, 0))
     animate()
-    
+
 pygame.quit()
-    
