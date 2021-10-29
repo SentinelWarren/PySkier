@@ -1,127 +1,52 @@
-# Listing_10-1.py
+# PySkier
 # Copyright Warren & Carter Sande, 2013
 # Released under MIT license   http://www.opensource.org/licenses/mit-license.php
-# Version $version  ----------------------------
+# Version 1.00
 
-# Skier program
+from get_images import GetImages
+import pygame, random
 
-import pygame, sys, os, random, cv2
+# Skier images folder path.
+images_folder = '../images/'
 
-import time
+# Get custom sorted image names.
+get_images = GetImages(images_folder)
+skier_images = get_images.sort_images()
 
-# different images for the skier depending on his direction
-"""
-start = time. time()
-"the code you want to test stays here"
-end = time. time()
-print(end - start)
-"""
-
-
-def load_images():
-    folder = 'images/'
-    image_names = []
-
-    for filename in os.listdir(folder):
-        if any([filename.endswith(x) for x in ['.png']]):
-            img_name = os.path.join(filename)
-            if not filename.startswith(('skier_crash.png', 'skier_flag.png', 'skier_tree.png')):
-                image_names.append(img_name)
-
-    return image_names
-
-
-def sort_images():
-    image_order = ["skier_down.png", "skier_right1.png", "skier_right2.png", "skier_left2.png", "skier_left1.png"]
-    unsorted_images = load_images()
-    order_map = {}
-    for pos, item in enumerate(image_order):
-        order_map[item] = pos
-
-    sorted_images = sorted(unsorted_images, key=order_map.get)
-
-    return sorted_images
-
-
-skier_images = sort_images()
-
-"""
-class GetImages(object):
-
-    def __init__(self):
-        self.folder = 'images/'
-        self.image_order = ["skier_down.png", "skier_right1.png", "skier_right2.png","skier_left2.png", "skier_left1.png"]
-        self.order_map = {}
-        
-        
-
-    def load_images(self):
-        self.image_names = []
-        for filename in os.listdir(self.folder):
-            if any([filename.endswith(x) for x in ['.png']]):
-                img_name = os.path.join(filename)
-                if not filename.startswith(('skier_crash.png', 'skier_flag.png', 'skier_tree.png')):
-                    self.image_names.append(img_name)
-
-        return self.image_names
-
-    def sort_images(self):
-        #self.sorted_images = self.load_images()
-        
-        for pos, item in enumerate(self.image_order):
-            self.order_map[item] = pos
-
-        #self.sorted_images = self.load_images(), self.sorted_images.sort(key=self.order_map.get)
-        self.loaded_images = self.load_images()
-        self.sorted_images = sorted(self.loaded_images, key=self.order_map.get)
-        
-        return self.sorted_images
-
-
-#Sorted skier_images
-#Simages = GetImages()
-
-print(GetImages().load_images())
-print(GetImages().sort_images())
-skier_images1 = GetImages().sort_images()
-print(skier_images1)
-end = time. time()
-print(end - start)
-
-"""
-
-
-# class for the Skier sprite
 class SkierClass(pygame.sprite.Sprite):
+    """ Skier sprite class"""
+
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("skier_down.png")
+        self.image = pygame.image.load(f"{images_folder}skier_down.png")
         self.rect = self.image.get_rect()
         self.rect.center = [320, 100]
         self.angle = 0
 
     def turn(self, direction):
-        # load new image and change speed when the skier turns
+        """ load new image and change speed when the skier turns. """
+
         self.angle = self.angle + direction
         if self.angle < -2:  self.angle = -2
         if self.angle > 2:  self.angle = 2
         center = self.rect.center
-        self.image = pygame.image.load(skier_images[self.angle])
+        self.image = pygame.image.load(f"{images_folder}{skier_images[self.angle]}")
         self.rect = self.image.get_rect()
         self.rect.center = center
         speed = [self.angle, 6 - abs(self.angle) * 2]
         return speed
 
     def move(self, speed):
-        # move the skier right and left
+        """ move the skier right and left. """
+
         self.rect.centerx = self.rect.centerx + speed[0]
         if self.rect.centerx < 20:  self.rect.centerx = 20
         if self.rect.centerx > 620: self.rect.centerx = 620
 
-    # class for obstacle sprites (trees and flags)
-
 
 class ObstacleClass(pygame.sprite.Sprite):
+    """ Obstacle sprites (trees & flags) class. """
+
     def __init__(self, image_file, location, type):
         pygame.sprite.Sprite.__init__(self)
         self.image_file = image_file
@@ -138,9 +63,11 @@ class ObstacleClass(pygame.sprite.Sprite):
             self.kill()
 
 
-# create one "screen" of obstacles: 640 x 640
-# use "blocks" of 64 x 64 pixels, so objects aren't too close together
 def create_map():
+    """ Creates one 'screen' of obstacles; 640 x 640 
+    use "blocks" of 64 x 64 pixels, so objects aren't too close together.
+    """
+
     global obstacles
     locations = []
     for _i in range(10):  # 10 obstacles per screen
@@ -151,15 +78,16 @@ def create_map():
             locations.append(location)
             type = random.choice(["tree", "flag"])
             if type == "tree":
-                img = "skier_tree.png"
+                img = f"{images_folder}skier_tree.png"
             elif type == "flag":
-                img = "skier_flag.png"
+                img = f"{images_folder}skier_flag.png"
             obstacle = ObstacleClass(img, location, type)
             obstacles.add(obstacle)
 
 
-# redraw the screen, including all sprites
 def animate():
+    """ redraw the screen, including all sprites. """
+
     screen.fill([255, 255, 255])
     obstacles.draw(screen)
     screen.blit(skier.image, skier.rect)
@@ -204,10 +132,10 @@ while running:
     if hit:
         if hit[0].type == "tree" and not hit[0].passed:  # crashed into tree
             points = points - 100
-            skier.image = pygame.image.load("skier_crash.png")  # crash image
+            skier.image = pygame.image.load(f"{images_folder}skier_crash.png")  # crash image
             animate()
             pygame.time.delay(1000)
-            skier.image = pygame.image.load("skier_down.png")  # resume skiing
+            skier.image = pygame.image.load(f"{images_folder}skier_down.png")  # resume skiing
             skier.angle = 0
             speed = [0, 6]
             hit[0].passed = True

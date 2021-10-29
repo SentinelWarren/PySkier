@@ -32,24 +32,27 @@ class GetImages():
 		Returns a list of custom sorted image files.
 		"""
 
+		self.unsorted_images = self.load_images()
+
 		for pos, item in enumerate(self.image_order):
 			self.order_map[item] = pos
 
 		#self.sorted_images = self.load_images(), self.sorted_images.sort(key=self.order_map.get)
-		self.loaded_images = self.load_images()
-		self.sorted_images = sorted(self.loaded_images, key=self.order_map.get)
+		self.sorted_images = sorted(self.unsorted_images, key=self.order_map.get)
 
 		return self.sorted_images
 
 
 if __name__ == "__main__":
 		# Get skier_images
-		skier_images = GetImages('images/')
-
 		start = time.time()
+		
+		get_images = GetImages('../images/')
+		skier_images = get_images.sort_images()
+		print(skier_images)
+		print(skier_images[-2])
 
-		print(skier_images.load_images())
-		print(skier_images.sort_images())
+		#print(skier_images.sort_images())
 
 		end = time.time()
 		print(end - start)
