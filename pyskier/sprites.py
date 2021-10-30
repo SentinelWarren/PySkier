@@ -1,4 +1,4 @@
-from get_images import GetImages
+from pyskier.get_images import GetImages
 from pygame import image, sprite
 
 class SkierSprite(sprite.Sprite):

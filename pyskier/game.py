@@ -4,7 +4,7 @@
 # Version 1.00
 
 import pygame, random
-from sprites import SkierSprite, ObstacleSprite
+from pyskier.sprites import SkierSprite, ObstacleSprite
 
 class SkierGame():
     """ Main Game class. """
