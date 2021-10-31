@@ -13,16 +13,18 @@ class SkierSprite(sprite.Sprite):
         self.angle = 0
 
     def turn(self, direction):
-        """ load new image and change speed when the skier turns. """
+        """ Load new image and change speed when the skier turns.
+        Returns speed value. 
+        """
 
-        self.skier_images = GetImages(self.images_path).sort_images()
+        self._skier_images = GetImages(self.images_path).sort_images()
 
         self.angle = self.angle + direction
         if self.angle < -2:  self.angle = -2
         if self.angle > 2:  self.angle = 2
 
         center = self.rect.center
-        self.image = image.load(f"{self.images_path}{self.skier_images[self.angle]}")
+        self.image = image.load(f"{self.images_path}{self._skier_images[self.angle]}")
         self.rect = self.image.get_rect()
         self.rect.center = center
 
@@ -30,7 +32,7 @@ class SkierSprite(sprite.Sprite):
         return self._speed
 
     def move(self, speed):
-        """ move the skier right and left. """
+        """ Move the skier right and left. """
 
         self.rect.centerx = self.rect.centerx + speed[0]
         if self.rect.centerx < 20:  self.rect.centerx = 20
@@ -50,6 +52,8 @@ class ObstacleSprite(sprite.Sprite):
         self.passed = False
 
     def update(self, speed):
+        """ Update obstacles according to speed."""
+        
         self.rect.centery -= speed[1]
         if self.rect.centery < -32:
             self.kill()
